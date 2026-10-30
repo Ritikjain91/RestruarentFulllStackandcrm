@@ -1,0 +1,241 @@
+{
+  "info": {
+    "name": "CRM Backend API",
+    "_postman_id": "a4d3f3e2-8812-4f11-9a99-b1d7dcb46a99",
+    "description": "Postman Collection for CRM Backend REST API with Express, MongoDB & JWT",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "counselorToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "leadId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Employee/Counselor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('counselorToken', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sarah Jenkins\",\n  \"email\": \"sarah.jenkins@crm.com\",\n  \"password\": \"SecurePass123!\",\n  \"phone\": \"+1234567890\",\n  \"role\": \"counselor\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login Employee/Counselor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('counselorToken', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sarah.jenkins@crm.com\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Current Counselor Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{counselorToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public Leads (No Auth)",
+      "item": [
+        {
+          "name": "Submit Public Enquiry Form",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('leadId', jsonData.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alex River\",\n  \"email\": \"alex.river@student.com\",\n  \"phone\": \"+1-555-0199\",\n  \"courseInterest\": \"Full Stack Web Development\",\n  \"message\": \"Looking to enroll for the upcoming weekend batch.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/leads/public",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "leads", "public"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Counselor CRM (Protected)",
+      "item": [
+        {
+          "name": "Fetch Unclaimed Public Leads",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{counselorToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/leads/unclaimed?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "leads", "unclaimed"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Claim a Lead",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{counselorToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/leads/{{leadId}}/claim",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "leads", "{{leadId}}", "claim"]
+            }
+          }
+        },
+        {
+          "name": "Fetch My Claimed Leads (Private)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{counselorToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/leads/claimed?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "leads", "claimed"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Lead Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{counselorToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/leads/{{leadId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "leads", "{{leadId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
